@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>{{ encabezado_pagina }}</title>
+</head>
+<body>
+
+<h1>{{ titulo_pagina }}</h1>
+
+<ul>
+    {% for contacto in contactos %}
+        <li> {{ contacto['name'] }} <a href="datos/contacto/{{ contacto['id'] }}" style="margin-left: 30px;">Ver datos</a></li>
+    {% endfor %}
+</ul>
+</body>
+</html>

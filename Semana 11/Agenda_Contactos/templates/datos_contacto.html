@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>{{ encabezado_pagina }}</title>
+</head>
+<body>
+    
+{% if contacto_encontrado %}
+    <h1>{{ titulo_pagina }}</h1>
+
+    <ul>
+        <li>email: {{ contacto_encontrado['email'] }}</li>
+        <li>Direccion: {{ contacto_encontrado['address']['street'] }}, {{ contacto_encontrado['address']['city'] }} city </li>
+        <li>Teléfono: {{ contacto_encontrado['phone'] }}</li>
+        <li>Página web: {{ contacto_encontrado['website'] }}</li>
+    </ul>
+{% else %}
+    
+    No existe coincidencias
+{% endif %}
+
+</body>
+</html>

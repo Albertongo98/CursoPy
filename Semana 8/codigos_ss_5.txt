@@ -1,0 +1,524 @@
+
+class Autenticacion:
+    def verificarAutenticacion(self):
+        is_login = False
+        while not is_login :
+            usuario = input("Ingresar usuario: ")
+            password = input("Ingresar contraseña: ")
+            if usuario != 'admin' or password != '12345':
+                print("Error de login")
+            else:
+                is_login = True
+******************************************************************************************************************
+
+import sqlite3 
+import os
+
+class BaseDatos:
+    
+    def __init__(self, nombreBaseDatos):
+        self.nombreBaseDatos = nombreBaseDatos
+
+******************************************************************************************************************
+
+def crearBaseDatos(self):
+    try:
+        conn = sqlite3.connect(self.nombreBaseDatos) 
+    except Exception as e:
+        print('Error al crear la Base de datos: {}'.format(e))
+
+******************************************************************************************************************
+
+def verificarBaseDatosExiste(self):
+    if os.path.isfile(self.nombreBaseDatos):
+        return True
+    else:
+        return False
+
+******************************************************************************************************************
+
+def crearTablaProductos(self):
+    conexion = self.abrirConexion()
+
+    conexion.execute('''CREATE TABLE productos
+        (id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nombre_producto TEXT NOT NULL,
+        descripcion TEXT NOT NULL,
+        precio FLOAT NOT NULL,
+        stock INTEGER NOT NULL
+        );''')
+    
+    conexion.close()
+
+******************************************************************************************************************
+
+def abrirConexion(self):
+try:
+    conexion = sqlite3.connect(self.nombreBaseDatos) 
+    return conexion
+except Exception as e:
+    print('Error al conectar a la Base de datos: {}'.format(e))
+
+******************************************************************************************************************
+
+import sqlite3 
+import os
+
+class BaseDatos:
+    
+    def __init__(self, nombreBaseDatos):
+        self.nombreBaseDatos = nombreBaseDatos
+    
+    def crearBaseDatos(self):
+        try:
+            conn = sqlite3.connect(self.nombreBaseDatos) 
+        except Exception as e:
+            print('Error al crear la Base de datos: {}'.format(e))
+            
+    def verificarBaseDatosExiste(self):
+        if os.path.isfile(self.nombreBaseDatos):
+            return True
+        else:
+            return False
+    
+    def crearTablaProductos(self):
+        conexion = self.abrirConexion()
+
+        conexion.execute('''CREATE TABLE productos
+                (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nombre_producto TEXT NOT NULL,
+                descripcion TEXT NOT NULL,
+                precio FLOAT NOT NULL,
+                stock INTEGER NOT NULL
+                );''')
+        
+        conexion.close()
+    
+    def abrirConexion(self):
+        try:
+            conexion = sqlite3.connect(self.nombreBaseDatos) 
+            return conexion
+        except Exception as e:
+            print('Error al conectar a la Base de datos: {}'.format(e))
+
+******************************************************************************************************************
+
+from base_datos import BaseDatos
+from autenticacion import Autenticacion
+
+class AdministracionInventario:
+    
+    baseDatos = None
+    autenticacion = None
+    
+    def __init__(self):
+        self.baseDatos = BaseDatos('inventario.db')
+        self.autenticacion = Autenticacion()
+        if self.baseDatos.verificarBaseDatosExiste():
+            self.autenticacion.verificarAutenticacion()
+        else:
+            self.baseDatos.crearBaseDatos()
+            self.baseDatos.crearTablaProductos()
+
+******************************************************************************************************************
+
+def mostrarListaProductos(self):
+    try:
+        conexion = self.baseDatos.abrirConexion()
+        cursor = conexion.cursor()
+        cursor.execute("SELECT * FROM productos")     
+        productos = cursor.fetchall()
+        if len(productos) > 0:
+            print("Lista de productos disponibles: ")
+            print("------------------------------------")
+            for id,nombre_producto,descripcion,precio,stock in productos:
+                print('id: {}, nombre del producto: {}, descripción: {}, precio: {}, stock: {}'
+                    .format(id, nombre_producto, descripcion, precio, stock))
+            print("------------------------------------")
+        else:
+            print("No hay productos que mostrar")
+            print("------------------------------------")
+    except sqlite3.Error as error:
+        print("Error al mostrar los datos de la tabla productos", error)
+    finally:
+        if conexion:
+            cursor.close()
+            conexion.close()
+
+******************************************************************************************************************
+
+def agregarProducto(self):
+        try:
+            conexion = self.baseDatos.abrirConexion()
+            cursor = conexion.cursor()
+            nombre_producto,descripcion,precio,stock = self.ingresarDatosProducto()
+            valores = (nombre_producto, descripcion, precio, stock)
+            sql = ''' INSERT INTO productos(nombre_producto,descripcion,precio,stock)
+                    VALUES(?,?,?,?) '''
+                    
+            cursor.execute(sql,valores)
+            conexion.commit()
+            print("Datos guardados correctamente")
+            print("------------------------------------")
+        except sqlite3.Error as error:
+            print('Error al intentar insertar los datos: {}'.format(e))
+        finally:
+            if conexion:
+                cursor.close()
+                conexion.close()
+
+******************************************************************************************************************
+
+def modificarProducto(self):
+    try:
+        conexion = self.baseDatos.abrirConexion()
+        cursor = conexion.cursor()
+        
+        cursor.execute("SELECT * FROM productos")     
+        productos = cursor.fetchall()
+        if len(productos) > 0:
+            
+            print("Lista de productos para modificar:")
+            self.mostrarListaProductos()
+            print("----------------------------------")
+            id_producto = self.ingresarID("Ingresa el id del producto a modificar \n")
+            
+            encontrar_producto = cursor.execute("SELECT * FROM productos WHERE id = ?", (id_producto,))    
+            producto = encontrar_producto.fetchone()
+            if producto :
+                nombre_producto,descripcion,precio,stock = self.ingresarDatosProducto()
+                sql = ''' UPDATE productos SET nombre_producto = ?, descripcion = ?, precio = ?, stock = ? WHERE id = ? '''
+                datos_producto = (nombre_producto,descripcion,precio,stock,id_producto)
+                cursor.execute(sql,datos_producto)
+                conexion.commit()
+                print("Registro modificado correctamente")
+                print("------------------------------------")
+            else:
+                print("No hay registro con ese id")
+                print("------------------------------------")
+        else:  
+            print("No hay productos para modificar")
+            print("------------------------------------")
+        
+    except sqlite3.Error as error:
+        print('Error al intentar modificar el registro: {}'.format(e))
+    finally:
+        if conexion:
+            cursor.close()
+            conexion.close()
+
+
+******************************************************************************************************************
+
+def eliminarProducto(self):
+    try:
+        conexion = self.baseDatos.abrirConexion()
+        cursor = conexion.cursor()
+        cursor.execute("SELECT * FROM productos")     
+        productos = cursor.fetchall()
+        if len(productos) > 0:
+        
+            print("Lista de productos para eliminar:")
+            self.mostrarListaProductos()
+            print("------------------------------------")
+            id_producto = self.ingresarID("Ingresa el id del producto a eliminar \n")
+            
+            encontrar_producto = cursor.execute("SELECT * FROM productos WHERE id = ?", (id_producto,))     
+            if len(encontrar_producto.fetchall()) == 1:
+                sql = ''' DELETE FROM productos WHERE id = ? '''
+                cursor.execute(sql,(id_producto,))
+                conexion.commit()
+                print("Registro eliminado correctamente")
+                print("------------------------------------")
+            else:
+                print("No hay registro con ese id")
+                print("------------------------------------")
+        
+        else:  
+            print("No hay productos para eliminar")
+            print("------------------------------------")
+            
+    except sqlite3.Error as error:
+        print('Error al intentar eliminar el registro: {}'.format(e))
+    finally:
+        if conexion:
+            cursor.close()
+            conexion.close()
+
+******************************************************************************************************************
+
+def ingresarID(self,mensaje):
+    id_producto = 0
+    datos_incorrectos = True
+    while datos_incorrectos:
+        try:
+            id_producto = int(input( mensaje ))
+            datos_incorrectos = False
+        except Exception as e:
+            print('Error al capturar el id del producto: {}'.format(e))
+            print('Intente de nuevo ingresar el id \n')
+            datos_incorrectos = True
+    return id_producto
+
+******************************************************************************************************************
+
+def ingresarDatosProducto(self):
+    datos_incorrectos = True
+    while datos_incorrectos:
+        try:
+            nombre_producto = input("Ingresa el nombre del producto \n")
+            descripcion = input("Ingresa descripción del producto \n")
+            precio = float(input("Ingresa el precio del producto \n"))
+            stock = int(input("Ingresa el stock del producto \n"))
+            datos_incorrectos = False
+        except Exception as e:
+            print('Error al capturar un dato: {}'.format(e))
+            print('Intente de nuevo ingresar los datos \n')
+            datos_incorrectos = True
+    return nombre_producto,descripcion,precio,stock
+
+******************************************************************************************************************
+
+from base_datos import BaseDatos
+from autenticacion import Autenticacion
+
+class AdministracionInventario:
+    
+    baseDatos = None
+    autenticacion = None
+    
+    def __init__(self):
+        self.baseDatos = BaseDatos('inventario.db')
+        self.autenticacion = Autenticacion()
+        if self.baseDatos.verificarBaseDatosExiste():
+            self.autenticacion.verificarAutenticacion()
+        else:
+            self.baseDatos.crearBaseDatos()
+            self.baseDatos.crearTablaProductos()
+
+    def mostrarListaProductos(self):
+        try:
+            conexion = self.baseDatos.abrirConexion()
+            cursor = conexion.cursor()
+            cursor.execute("SELECT * FROM productos")     
+            productos = cursor.fetchall()
+            if len(productos) > 0:
+                print("Lista de productos disponibles: ")
+                print("------------------------------------")
+                for id,nombre_producto,descripcion,precio,stock in productos:
+                    print('id: {}, nombre del producto: {}, descripción {}, precio: {}, stock: {}'
+                        .format(id, nombre_producto, descripcion, precio, stock))
+                print("------------------------------------")
+            else:
+                print("No hay productos que mostrar")
+                print("------------------------------------")
+        except sqlite3.Error as error:
+            print("Error al mostrar los datos de la tabla productos", error)
+        finally:
+            if conexion:
+                cursor.close()
+                conexion.close()
+        
+    def agregarProducto(self):
+        try:
+            conexion = self.baseDatos.abrirConexion()
+            cursor = conexion.cursor()
+            nombre_producto,descripcion,precio,stock = self.ingresarDatosProducto()
+            valores = (nombre_producto, descripcion, precio, stock)
+            sql = ''' INSERT INTO productos(nombre_producto,descripcion,precio,stock)
+                    VALUES(?,?,?,?) '''
+                    
+            cursor.execute(sql,valores)
+            conexion.commit()
+            print("Datos guardados correctamente")
+            print("------------------------------------")
+        except sqlite3.Error as error:
+            print('Error al intentar insertar los datos: {}'.format(e))
+        finally:
+            if conexion:
+                cursor.close()
+                conexion.close()
+            
+    def modificarProducto(self):
+        try:
+            conexion = self.baseDatos.abrirConexion()
+            cursor = conexion.cursor()
+            
+            cursor.execute("SELECT * FROM productos")     
+            productos = cursor.fetchall()
+            if len(productos) > 0:
+                
+                print("Lista de productos para modificar:")
+                self.mostrarListaProductos()
+                print("----------------------------------")
+                id_producto = self.ingresarID("Ingresa el id del producto a modificar \n")
+                
+                encontrar_producto = cursor.execute("SELECT * FROM productos WHERE id = ?", (id_producto,))    
+                producto = encontrar_producto.fetchone()
+                if producto :
+                    nombre_producto,descripcion,precio,stock = self.ingresarDatosProducto()
+                    sql = ''' UPDATE productos SET nombre_producto = ?, descripcion = ?, precio = ?, stock = ? WHERE id = ? '''
+                    datos_producto = (nombre_producto,descripcion,precio,stock,id_producto)
+                    cursor.execute(sql,datos_producto)
+                    conexion.commit()
+                    print("Registro modificado correctamente")
+                    print("------------------------------------")
+                else:
+                    print("No hay registro con ese id")
+                    print("------------------------------------")
+            else:  
+                print("No hay productos para modificar")
+                print("------------------------------------")
+            
+        except sqlite3.Error as error:
+            print('Error al intentar modificar el registro: {}'.format(e))
+        finally:
+            if conexion:
+                cursor.close()
+                conexion.close()
+        
+    def eliminarProducto(self):
+        
+        try:
+            conexion = self.baseDatos.abrirConexion()
+            cursor = conexion.cursor()
+            cursor.execute("SELECT * FROM productos")     
+            productos = cursor.fetchall()
+            if len(productos) > 0:
+            
+                print("Lista de productos para eliminar:")
+                self.mostrarListaProductos()
+                print("------------------------------------")
+                id_producto = self.ingresarID("Ingresa el id del producto a eliminar \n")
+                
+                encontrar_producto = cursor.execute("SELECT * FROM productos WHERE id = ?", (id_producto,))     
+                if len(encontrar_producto.fetchall()) == 1:
+                    sql = ''' DELETE FROM productos WHERE id = ? '''
+                    cursor.execute(sql,(id_producto,))
+                    conexion.commit()
+                    print("Registro eliminado correctamente")
+                    print("------------------------------------")
+                else:
+                    print("No hay registro con ese id")
+                    print("------------------------------------")
+            
+            else:  
+                print("No hay productos para eliminar")
+                print("------------------------------------")
+                
+        except sqlite3.Error as error:
+            print('Error al intentar eliminar el registro: {}'.format(e))
+        finally:
+            if conexion:
+                cursor.close()
+                conexion.close()
+                
+    def ingresarID(self,mensaje):
+        id_producto = 0
+        datos_incorrectos = True
+        while datos_incorrectos:
+            try:
+                id_producto = int(input( mensaje ))
+                datos_incorrectos = False
+            except Exception as e:
+                print('Error al capturar el id del producto: {}'.format(e))
+                print('Intente de nuevo ingresar el id \n')
+                datos_incorrectos = True
+        return id_producto
+        
+    def ingresarDatosProducto(self):
+        datos_incorrectos = True
+        while datos_incorrectos:
+            try:
+                nombre_producto = input("Ingresa el nombre del producto: \n")
+                descripcion = input("Ingresa descripción del producto: \n")
+                precio = float(input("Ingresa el precio del producto: \n"))
+                stock = int(input("Ingresa el stock del producto: \n"))
+                datos_incorrectos = False
+            except Exception as e:
+                print('Error al capturar un dato: {}'.format(e))
+                print('Intente de nuevo ingresar los datos \n')
+                datos_incorrectos = True
+        return nombre_producto,descripcion,precio,stock
+
+******************************************************************************************************************
+
+from administracion_inventario import AdministracionInventario
+
+class Aplicacion:
+    
+    def __init__(self):
+        self.iniciarAplicacion()
+
+******************************************************************************************************************
+
+def iniciarAplicacion(self):
+    invetario = AdministracionInventario()
+    print("------------------------------------")
+    print("Bienvenido al sistema de Inventarios")
+    salir_programa = False
+    while not salir_programa:
+        print("Menú del inventario")
+        print(""" 
+            1.- Mostrar lista de productos
+            2.- Agregar producto
+            3.- Modificar producto
+            4.- Eliminar producto
+            5.- Salir del programa
+            """)
+        opcion = int(input("Indica una opción del menú: "))
+        if opcion == 1:
+            invetario.mostrarListaProductos()
+        elif opcion == 2:
+            invetario.agregarProducto()
+        elif opcion == 3:
+            invetario.modificarProducto()
+        elif opcion == 4:
+            invetario.eliminarProducto()
+        if opcion == 5:
+            print("Salida del programa, hasta luego ")
+            salir_programa = True
+
+******************************************************************************************************************
+
+sistema_inventario = Aplicacion()
+
+******************************************************************************************************************
+
+from administracion_inventario import AdministracionInventario
+
+class Aplicacion:
+    
+    def __init__(self):
+        self.iniciarAplicacion()
+    
+    def iniciarAplicacion(self):
+        invetario = AdministracionInventario()
+        print("------------------------------------")
+        print("Bienvenido al sistema de Inventarios")
+        salir_programa = False
+        while not salir_programa:
+            print("Menú del inventario")
+            print(""" 
+                1.- Mostrar lista de productos
+                2.- Agregar producto
+                3.- Modificar producto
+                4.- Eliminar producto
+                5.- Salir del programa
+                """)
+            opcion = int(input("Indica una opción del menú "))
+            if opcion == 1:
+                invetario.mostrarListaProductos()
+            elif opcion == 2:
+                invetario.agregarProducto()
+            elif opcion == 3:
+                invetario.modificarProducto()
+            elif opcion == 4:
+                invetario.eliminarProducto()
+            if opcion == 5:
+                print("Salida del programa, hasta luego ")
+                salir_programa = True
+                
+sistema_inventario = Aplicacion()
+
+

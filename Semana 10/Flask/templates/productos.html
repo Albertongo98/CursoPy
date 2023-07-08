@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>{{ encabezado_pagina }}</title>
+</head>
+<body>
+
+<h1>{{ titulo_pagina }}</h1>
+
+<ul>
+    {% for articulo in articulos %}
+        <li> {{ articulo }}</li>
+    {% endfor %}
+</ul>
+
+</body>
+</html>
